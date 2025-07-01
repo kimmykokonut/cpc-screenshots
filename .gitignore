@@ -1,0 +1,26 @@
+# Environment variables
+.env
+
+# Virtual environment
+venv/
+
+# Playwright report and trace files
+playwright-report/
+trace.zip
+
+# Screenshots and videos
+screenshots/*
+videos/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Node modules (if using Node.js)
+node_modules/
+
+# macOS specific files
+.DS_Store
+
+.ruff_cache
