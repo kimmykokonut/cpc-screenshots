@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 from datetime import datetime
 
 from playwright.sync_api import sync_playwright
@@ -9,7 +9,10 @@ from urls import *
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-iframe_selector = 'iframe[src="https://widgets.sociablekit.com/eventbrite-events/iframe/25357779"]'
+iframe_selector = (
+    'iframe[src="https://widgets.sociablekit.com/eventbrite-events/iframe/25357779"]'
+)
+
 
 def wait_for_eventbrite_widget(page, iframe_selector, event_selector, timeout=20000):
     # Scroll to bottom to trigger widget loading
@@ -17,16 +20,21 @@ def wait_for_eventbrite_widget(page, iframe_selector, event_selector, timeout=20
     page.wait_for_timeout(2000)
     # wait for iframe to be attached
     try:
-        iframe_element = page.wait_for_selector(iframe_selector, timeout=20000, state="attached")
+        iframe_element = page.wait_for_selector(
+            iframe_selector, timeout=20000, state="attached"
+        )
         iframe = iframe_element.content_frame()
 
         if iframe:
-            iframe.wait_for_selector('.event-single-item', timeout=20000, state="attached")
+            iframe.wait_for_selector(
+                ".event-single-item", timeout=20000, state="attached"
+            )
             page.wait_for_timeout(1000)
         else:
             logger.warning("Eventbrite iframe not found or not loaded.")
     except Exception as e:
         logger.warning(f"Error waiting for Eventbrite iframe or content: {e}")
+
 
 def take_home_screenshots(page, base_dated_dir, playwright, browser):
     home_dir = os.path.join(base_dated_dir, "home")
@@ -37,7 +45,7 @@ def take_home_screenshots(page, base_dated_dir, playwright, browser):
         page.goto(url)
         logger.info(f"At url: {url}")
         # wait for events to load
-        wait_for_eventbrite_widget(page, iframe_selector, '.event-single-item')
+        wait_for_eventbrite_widget(page, iframe_selector, ".event-single-item")
 
         # Scroll to page top before screenshot so navbar is in correct location
         page.evaluate("window.scrollTo(0, 0)")
@@ -52,30 +60,43 @@ def take_home_screenshots(page, base_dated_dir, playwright, browser):
         mobile_page = context.new_page()
         mobile_page.goto(url)
         # wait for events to load
-        wait_for_eventbrite_widget(mobile_page, iframe_selector, '.event-single-item')
+        wait_for_eventbrite_widget(mobile_page, iframe_selector, ".event-single-item")
 
         mobile_page.screenshot(path=f"{home_dir}/{name}-mobile.png", full_page=True)
         mobile_page.close()
         context.close()
         logger.info(f"Mobile screenshot taken: {name}")
 
-def take_content_screenshots(page, base_dated_dir):
+
+##################################
+def take_content_screenshots(page, base_dated_dir, playwright, browser):
     content_dir = os.path.join(base_dated_dir, "content")
     os.makedirs(content_dir, exist_ok=True)
 
     for url, name in content_urls.items():
-        page.set_viewport_size({"width": 1280, "height": 720})
+        page.set_viewport_size({"width": 1280, "height": 2000})
         page.goto(url)
         logger.info(f"At url: {url}")
-        page.wait_for_load_state("domcontentloaded")  # Wait for full page load
-        page.wait_for_timeout(30000)
+        page.wait_for_load_state("domcontentloaded", timeout=50000)
+        # img lazy load at bottom page? header
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_timeout(2000)
+        # scroll top
+        page.evaluate("window.scrollTo(0, 0)")
         page.screenshot(path=f"{content_dir}/{name}.png", full_page=True)
         logger.info(f"Screenshot taken: {name}")
+
         # take mobile screenshots
-        page.set_viewport_size({"width": 375, "height": 812})
-        page.wait_for_load_state("domcontentloaded")  # Wait for full page load
-        page.wait_for_timeout(30000)
-        page.screenshot(path=f"{content_dir}/{name}-mobile.png", full_page=True)
+        iphone = playwright.devices["iPhone 12"]
+        context = browser.new_context(**iphone)
+        mobile_page = context.new_page()
+        mobile_page.goto(url)
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_timeout(2000)
+
+        mobile_page.screenshot(path=f"{content_dir}/{name}-mobile.png", full_page=True)
+        mobile_page.close()
+        context.close()
         logger.info(f"Mobile screenshot taken: {name}")
 
 
@@ -118,8 +139,8 @@ def take_forms_screenshots(page, base_dated_dir):
         page.screenshot(path=f"{forms_dir}/{name}-mobile.png", full_page=True)
         logger.info(f"Mobile screenshot taken: {name}")
 
-def main():
 
+def main():
     timestamp = datetime.now().strftime("%Y%m%d-%H%M")
     # create dated folder to hold screenshots
     base_dated_dir = f"/screenshots/{timestamp}"
@@ -132,7 +153,7 @@ def main():
         page = context.new_page()
 
         take_home_screenshots(page, base_dated_dir, p, browser)
-        take_content_screenshots(page, base_dated_dir)
+        take_content_screenshots(page, base_dated_dir, p, browser)
         take_programs_screenshots(page, base_dated_dir)
         take_forms_screenshots(page, base_dated_dir)
 
