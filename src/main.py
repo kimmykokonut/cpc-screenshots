@@ -12,28 +12,31 @@ logger = logging.getLogger(__name__)
 iframe_selector = (
     'iframe[src="https://widgets.sociablekit.com/eventbrite-events/iframe/25357779"]'
 )
+yt_iframe_selector = 'iframe[src*="https://www.youtube.com/embed/"]'
 
 
-def wait_for_eventbrite_widget(page, iframe_selector, event_selector, timeout=20000):
-    # Scroll to bottom to trigger widget loading
-    page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-    page.wait_for_timeout(2000)
+def wait_for_iframe_load(page, iframe_selector, event_selector, scroll_top=False):
+    if scroll_top:
+        # scroll top for /learn yt iframe
+        page.evaluate("window.scrollTo(0,0)")
+    else:
+        # Scroll to bottom to trigger widget loading
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
     # wait for iframe to be attached
+    page.wait_for_timeout(3000)
     try:
         iframe_element = page.wait_for_selector(
-            iframe_selector, timeout=20000, state="attached"
+            iframe_selector, timeout=40000, state="attached"
         )
         iframe = iframe_element.content_frame()
 
         if iframe:
-            iframe.wait_for_selector(
-                ".event-single-item", timeout=20000, state="attached"
-            )
+            iframe.wait_for_selector(event_selector, timeout=20000, state="attached")
             page.wait_for_timeout(1000)
         else:
-            logger.warning("Eventbrite iframe not found or not loaded.")
+            logger.warning("iframe not found or not loaded.")
     except Exception as e:
-        logger.warning(f"Error waiting for Eventbrite iframe or content: {e}")
+        logger.warning(f"Error waiting for iframe or content: {e}")
 
 
 def take_home_screenshots(page, base_dated_dir, playwright, browser):
@@ -45,7 +48,7 @@ def take_home_screenshots(page, base_dated_dir, playwright, browser):
         page.goto(url)
         logger.info(f"At url: {url}")
         # wait for events to load
-        wait_for_eventbrite_widget(page, iframe_selector, ".event-single-item")
+        wait_for_iframe_load(page, iframe_selector, ".event-single-item")
 
         # Scroll to page top before screenshot so navbar is in correct location
         page.evaluate("window.scrollTo(0, 0)")
@@ -60,7 +63,7 @@ def take_home_screenshots(page, base_dated_dir, playwright, browser):
         mobile_page = context.new_page()
         mobile_page.goto(url)
         # wait for events to load
-        wait_for_eventbrite_widget(mobile_page, iframe_selector, ".event-single-item")
+        wait_for_iframe_load(mobile_page, iframe_selector, ".event-single-item")
 
         mobile_page.screenshot(path=f"{home_dir}/{name}-mobile.png", full_page=True)
         mobile_page.close()
@@ -77,9 +80,17 @@ def take_content_screenshots(page, base_dated_dir, playwright, browser):
         page.goto(url)
         logger.info(f"At url: {url}")
         page.wait_for_load_state("domcontentloaded", timeout=50000)
-        # img lazy load at bottom page? header
-        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        page.wait_for_timeout(2000)
+        # issue YT not showing
+        if url == "https://www.capeperpetuacollaborative.org/learn":
+            wait_for_iframe_load(
+                page,
+                yt_iframe_selector,
+                ".ytp-cued-thumbnail-overlay-image",
+                scroll_top=True,
+            )
+        else:
+            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            page.wait_for_timeout(3000)
         # scroll top
         page.evaluate("window.scrollTo(0, 0)")
         page.screenshot(path=f"{content_dir}/{name}.png", full_page=True)
@@ -90,8 +101,21 @@ def take_content_screenshots(page, base_dated_dir, playwright, browser):
         context = browser.new_context(**iphone)
         mobile_page = context.new_page()
         mobile_page.goto(url)
-        mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        mobile_page.wait_for_timeout(2000)
+        if url == "https://www.capeperpetuacollaborative.org/learn":
+            logger.info("Checking for YouTube iframe in mobile view...")
+            iframes = mobile_page.query_selector_all("iframe")
+            for i, iframe in enumerate(iframes):
+                logger.info(f"Mobile iframe {i}: {iframe.get_attribute('src')}")
+
+            wait_for_iframe_load(
+                mobile_page,
+                'iframe[src*="oiZz7CCyujM"]',
+                ".ytp-cued-thumbnail-overlay-image",
+                scroll_top=True,
+            )
+        else:
+            mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            mobile_page.wait_for_timeout(5000)
 
         mobile_page.screenshot(path=f"{content_dir}/{name}-mobile.png", full_page=True)
         mobile_page.close()
@@ -104,11 +128,10 @@ def take_programs_screenshots(page, base_dated_dir, playwright, browser):
     os.makedirs(programs_dir, exist_ok=True)
 
     for url, name in programs_urls.items():
-        page.set_viewport_size({"width": 1280, "height": 720})
+        page.set_viewport_size({"width": 1280, "height": 2000})
         page.goto(url)
         logger.info(f"At url: {url}")
-        page.wait_for_load_state("load")  # Wait for full page load
-        page.wait_for_timeout(3000)
+        page.wait_for_load_state("domcontentloaded", timeout=50000)
         page.screenshot(path=f"{programs_dir}/{name}.png", full_page=True)
         logger.info(f"Screenshot taken: {name}")
         # take mobile screenshots
@@ -122,17 +145,10 @@ def take_programs_screenshots(page, base_dated_dir, playwright, browser):
         mobile_page.wait_for_timeout(1000)
         mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         mobile_page.wait_for_timeout(3000)
-
         mobile_page.screenshot(path=f"{programs_dir}/{name}-mobile.png", full_page=True)
         mobile_page.close()
         context.close()
         logger.info(f"Mobile screenshot taken: {name}")
-
-        # page.set_viewport_size({"width": 375, "height": 812})
-        # page.wait_for_load_state("load")  # Wait for full page load
-        # page.wait_for_timeout(3000)
-        # page.screenshot(path=f"{programs_dir}/{name}-mobile.png", full_page=True)
-        # logger.info(f"Mobile screenshot taken: {name}")
 
 
 def take_forms_screenshots(page, base_dated_dir):
@@ -167,10 +183,10 @@ def main():
         context = browser.new_context()
         page = context.new_page()
 
-        # take_home_screenshots(page, base_dated_dir, p, browser)
+        take_home_screenshots(page, base_dated_dir, p, browser)
         take_content_screenshots(page, base_dated_dir, p, browser)
         take_programs_screenshots(page, base_dated_dir, p, browser)
-        # take_forms_screenshots(page, base_dated_dir)
+        take_forms_screenshots(page, base_dated_dir)
 
         browser.close()
         logger.info("------------bye!------------")
