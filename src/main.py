@@ -151,7 +151,7 @@ def take_programs_screenshots(page, base_dated_dir, playwright, browser):
         logger.info(f"Mobile screenshot taken: {name}")
 
 
-def take_forms_screenshots(page, base_dated_dir):
+def take_forms_screenshots(page, base_dated_dir, playwright, browser):
     forms_dir = os.path.join(base_dated_dir, "forms")
     os.makedirs(forms_dir, exist_ok=True)
 
@@ -163,11 +163,21 @@ def take_forms_screenshots(page, base_dated_dir):
         # page.wait_for_timeout(3000)
         page.screenshot(path=f"{forms_dir}/{name}.png", full_page=True)
         logger.info(f"Screenshot taken: {name}")
+
         # take mobile screenshots
-        page.set_viewport_size({"width": 375, "height": 812})
-        page.wait_for_load_state("domcontentloaded")  # Wait for full page load
-        # page.wait_for_timeout(2000)
-        page.screenshot(path=f"{forms_dir}/{name}-mobile.png", full_page=True)
+        iphone = playwright.devices["iPhone 12"]
+        context = browser.new_context(**iphone)
+        mobile_page = context.new_page()
+        mobile_page.goto(url)
+        mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        mobile_page.wait_for_timeout(6000)
+        mobile_page.evaluate("window.scrollTo(0, 0)")
+        mobile_page.wait_for_timeout(1000)
+        mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        mobile_page.wait_for_timeout(3000)
+        mobile_page.screenshot(path=f"{forms_dir}/{name}-mobile.png", full_page=True)
+        mobile_page.close()
+        context.close()
         logger.info(f"Mobile screenshot taken: {name}")
 
 
@@ -186,7 +196,7 @@ def main():
         take_home_screenshots(page, base_dated_dir, p, browser)
         take_content_screenshots(page, base_dated_dir, p, browser)
         take_programs_screenshots(page, base_dated_dir, p, browser)
-        take_forms_screenshots(page, base_dated_dir)
+        take_forms_screenshots(page, base_dated_dir, p, browser)
 
         browser.close()
         logger.info("------------bye!------------")
