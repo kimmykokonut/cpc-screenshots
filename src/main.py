@@ -9,10 +9,10 @@ from urls import *
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-iframe_selector = (
+events_iframe_selector = (
     'iframe[src="https://widgets.sociablekit.com/eventbrite-events/iframe/25357779"]'
 )
-yt_iframe_selector = 'iframe[src*="https://www.youtube.com/embed/"]'
+learn_iframe_selector = 'iframe[src*="https://www.youtube.com/embed/"]'
 
 
 def wait_for_iframe_load(page, iframe_selector, event_selector, scroll_top=False):
@@ -48,7 +48,7 @@ def take_home_screenshots(page, base_dated_dir, playwright, browser):
         page.goto(url)
         logger.info(f"At url: {url}")
         # wait for events to load
-        wait_for_iframe_load(page, iframe_selector, ".event-single-item")
+        wait_for_iframe_load(page, events_iframe_selector, ".event-single-item")
 
         # Scroll to page top before screenshot so navbar is in correct location
         page.evaluate("window.scrollTo(0, 0)")
@@ -63,7 +63,7 @@ def take_home_screenshots(page, base_dated_dir, playwright, browser):
         mobile_page = context.new_page()
         mobile_page.goto(url)
         # wait for events to load
-        wait_for_iframe_load(mobile_page, iframe_selector, ".event-single-item")
+        wait_for_iframe_load(mobile_page, events_iframe_selector, ".event-single-item")
 
         mobile_page.screenshot(path=f"{home_dir}/{name}-mobile.png", full_page=True)
         mobile_page.close()
@@ -80,11 +80,10 @@ def take_content_screenshots(page, base_dated_dir, playwright, browser):
         page.goto(url)
         logger.info(f"At url: {url}")
         page.wait_for_load_state("domcontentloaded", timeout=50000)
-        # issue YT not showing
         if url == "https://www.capeperpetuacollaborative.org/learn":
             wait_for_iframe_load(
                 page,
-                yt_iframe_selector,
+                learn_iframe_selector,
                 ".ytp-cued-thumbnail-overlay-image",
                 scroll_top=True,
             )
@@ -109,7 +108,7 @@ def take_content_screenshots(page, base_dated_dir, playwright, browser):
 
             wait_for_iframe_load(
                 mobile_page,
-                'iframe[src*="oiZz7CCyujM"]',
+                learn_iframe_selector,
                 ".ytp-cued-thumbnail-overlay-image",
                 scroll_top=True,
             )
