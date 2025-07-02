@@ -159,20 +159,14 @@ def take_forms_screenshots(page, base_dated_dir, playwright, browser):
         page.set_viewport_size({"width": 1280, "height": 720})
         page.goto(url)
         logger.info(f"At url: {url}")
-        page.wait_for_load_state("domcontentloaded")  # Wait for full page load
-        # page.wait_for_timeout(3000)
+        page.wait_for_load_state("domcontentloaded")
         page.screenshot(path=f"{forms_dir}/{name}.png", full_page=True)
         logger.info(f"Screenshot taken: {name}")
-
         # take mobile screenshots
         iphone = playwright.devices["iPhone 12"]
         context = browser.new_context(**iphone)
         mobile_page = context.new_page()
         mobile_page.goto(url)
-        mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        mobile_page.wait_for_timeout(6000)
-        mobile_page.evaluate("window.scrollTo(0, 0)")
-        mobile_page.wait_for_timeout(1000)
         mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         mobile_page.wait_for_timeout(3000)
         mobile_page.screenshot(path=f"{forms_dir}/{name}-mobile.png", full_page=True)
