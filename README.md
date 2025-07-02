@@ -51,7 +51,7 @@ Created for a specific url, you will need to alter code depending on differing c
 * iframe loading and navbar position when scrolling/waiting for home page load
 * pages wip
    - /team: mobile- img blurr
-   - /learn: mobile - youtube not visible
+   - /learn: mobile - youtube not visible, leaving as-is
    - /programs:
       - debris: desktop no img
       - tidepool: desktop missing img

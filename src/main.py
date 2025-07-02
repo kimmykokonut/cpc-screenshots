@@ -12,47 +12,27 @@ logger = logging.getLogger(__name__)
 events_iframe_selector = (
     'iframe[src="https://widgets.sociablekit.com/eventbrite-events/iframe/25357779"]'
 )
-learn_iframe_selector = 'iframe[src*="https://www.youtube.com"]'
-
-# desktop:
-# https://www.youtube.com/embed/oiZz7CCyujM?autoplay=0&mute=0&controls=1&loop=0&origin=https%3A%2F%2Fwww.capeperpetuacollaborative.org&playsinline=1&enablejsapi=1&widgetid=1&forigin=https%3A%2F%2Fwww.capeperpetuacollaborative.org%2Flearn&aoriginsup=1&vf=6
-# https://www.youtube.com/embed/oiZz7CCyujM?autoplay=0&mute=0&controls=1&loop=0&origin=https%3A%2F%2Fwww.capeperpetuacollaborative.org&playsinline=1&enablejsapi=1&widgetid=1&forigin=https%3A%2F%2Fwww.capeperpetuacollaborative.org%2Flearn&aoriginsup=1&vf=6
-# mobile
-# NONE
-# inspect
-# src="https://www.youtube.com/embed/oiZz7CCyujM?autoplay=0&mute=0&controls=1&loop=0&origin=https%3A%2F%2Fwww.capeperpetuacollaborative.org&playsinline=1&enablejsapi=1&widgetid=1&forigin=https%3A%2F%2Fwww.capeperpetuacollaborative.org%2Flearn&aoriginsup=1&vf=3"
+youtube_iframe_selector = 'iframe[src*="https://www.youtube.com"]'
 
 
 def wait_for_iframe_load(page, iframe_selector, event_selector, scroll_top=False):
+    logger.info(
+        f"Waiting for iframe to load...selector={iframe_selector}, event:{event_selector}"
+    )
     if scroll_top:
-        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         # scroll top for /learn yt iframe
         page.evaluate("window.scrollTo(0,0)")
     else:
         # Scroll to bottom to trigger events widget loading
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
     # wait for iframe to be attached
-    page.wait_for_timeout(5000)  # changed from 3k to 5 sec, 5k
-    # LOGGING TEST
-    logger.info("Checking for iframes...")
-    iframes = page.query_selector_all("iframe")
-    logger.info(iframes)
-    for i, iframe in enumerate(iframes):
-        logger.info(f"[wait_for_iframe_load] iframe {i}: {iframe.get_attribute('src')}")
+    page.wait_for_timeout(3000)  # changed from 3k to 5 sec, 5k
 
     try:
         iframe_element = page.wait_for_selector(
-            iframe_selector, timeout=40000, state="attached"
+            iframe_selector, timeout=15000, state="attached"
         )
-        # Log all iframes after waiting (in case new ones appeared)
-        iframes = page.query_selector_all("iframe")
-        for i, iframe in enumerate(iframes):
-            logger.info(
-                f"[wait_for_iframe_load after wait] iframe {i}: {iframe.get_attribute('src')}"
-            )
-
         iframe = iframe_element.content_frame()
-
         if iframe:
             iframe.wait_for_selector(event_selector, timeout=20000, state="attached")
             page.wait_for_timeout(1000)
@@ -70,7 +50,6 @@ def take_home_screenshots(page, base_dated_dir, playwright, browser):
         page.set_viewport_size({"width": 1280, "height": 2000})
         page.goto(url)
         logger.info(f"At url: {url}")
-        # wait for events to load
         wait_for_iframe_load(page, events_iframe_selector, ".event-single-item")
 
         # Scroll to page top before screenshot so navbar is in correct location
@@ -87,7 +66,6 @@ def take_home_screenshots(page, base_dated_dir, playwright, browser):
         mobile_page.goto(url)
         # wait for events to load
         wait_for_iframe_load(mobile_page, events_iframe_selector, ".event-single-item")
-
         mobile_page.screenshot(path=f"{home_dir}/{name}-mobile.png", full_page=True)
         mobile_page.close()
         context.close()
@@ -102,11 +80,11 @@ def take_content_screenshots(page, base_dated_dir, playwright, browser):
         page.set_viewport_size({"width": 1280, "height": 2000})
         page.goto(url)
         logger.info(f"At url: {url}")
-        page.wait_for_load_state("domcontentloaded", timeout=50000)
+        page.wait_for_load_state("domcontentloaded", timeout=15000)  # change 50k to 15k
         if url == "https://www.capeperpetuacollaborative.org/learn":
             wait_for_iframe_load(
                 page,
-                learn_iframe_selector,
+                youtube_iframe_selector,
                 ".ytp-cued-thumbnail-overlay-image",
                 scroll_top=True,
             )
@@ -128,30 +106,10 @@ def take_content_screenshots(page, base_dated_dir, playwright, browser):
             logger.info("in mobile learn view...")
             wait_for_iframe_load(
                 mobile_page,
-                learn_iframe_selector,
+                youtube_iframe_selector,
                 ".ytmCuedOverlayHost",
-                scroll_top=False,
+                scroll_top=True,
             )
-        #     mobile_page.wait_for_timeout(8000)
-        #     # wait continer fiv
-        #     try:
-        #         container = mobile_page.wait_for_selector(
-        #             ".VideoPlayer2054936319__playerContainer", timeout=10000
-        #         )
-        #         logger.info("YouTube player container found.")
-        #         # Now look for iframes inside the container
-        #         iframes = container.query_selector_all("iframe")
-        #         logger.info(f"Found {len(iframes)} iframe(s) in container.")
-        #         for i, iframe in enumerate(iframes):
-        #             logger.info(f"Mobile iframe {i}: {iframe.get_attribute('src')}")
-        #     except Exception as e:
-        #         logger.warning(f"YouTube player container not found: {e}")
-        #         wait_for_iframe_load(
-        #             mobile_page,
-        #             learn_iframe_selector,
-        #             ".ytp-cued-thumbnail-overlay-image",
-        #             scroll_top=True,
-        #         )
         else:
             mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
             mobile_page.wait_for_timeout(5000)
@@ -170,7 +128,14 @@ def take_programs_screenshots(page, base_dated_dir, playwright, browser):
         page.set_viewport_size({"width": 1280, "height": 2000})
         page.goto(url)
         logger.info(f"At url: {url}")
-        page.wait_for_load_state("domcontentloaded", timeout=50000)
+        page.wait_for_load_state("domcontentloaded", timeout=15000)  # change 50k to 15k
+        if url == "https://www.capeperpetuacollaborative.org/land-sea-symposium":
+            wait_for_iframe_load(
+                page,
+                youtube_iframe_selector,
+                ".html5-video-container",
+                scroll_top=False,
+            )
         page.screenshot(path=f"{programs_dir}/{name}.png", full_page=True)
         logger.info(f"Screenshot taken: {name}")
         # take mobile screenshots
