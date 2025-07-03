@@ -2,7 +2,7 @@ home_urls = {
     "https://www.capeperpetuacollaborative.org/": "home",
 }
 
-content_urls = {
+about_and_info_urls = {
     "https://www.capeperpetuacollaborative.org/the-team": "about-us-team",
     "https://www.capeperpetuacollaborative.org/partners": "about-us-partners",
     "https://www.capeperpetuacollaborative.org/our-fiscal-sponsor": "about-us-fiscal",

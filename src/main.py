@@ -76,7 +76,7 @@ def take_content_screenshots(page, base_dated_dir, playwright, browser):
     content_dir = os.path.join(base_dated_dir, "content")
     os.makedirs(content_dir, exist_ok=True)
 
-    for url, name in content_urls.items():
+    for url, name in about_and_info_urls.items():
         page.set_viewport_size({"width": 1280, "height": 2000})
         page.goto(url)
         logger.info(f"At url: {url}")
@@ -128,7 +128,7 @@ def take_programs_screenshots(page, base_dated_dir, playwright, browser):
         page.set_viewport_size({"width": 1280, "height": 2000})
         page.goto(url)
         logger.info(f"At url: {url}")
-        page.wait_for_load_state("domcontentloaded", timeout=15000)  # change 50k to 15k
+        page.wait_for_load_state("domcontentloaded")  # change 50k to 15k
         if url == "https://www.capeperpetuacollaborative.org/land-sea-symposium":
             wait_for_iframe_load(
                 page,
@@ -136,6 +136,7 @@ def take_programs_screenshots(page, base_dated_dir, playwright, browser):
                 ".html5-video-container",
                 scroll_top=False,
             )
+        page.wait_for_timeout(1000)
         page.screenshot(path=f"{programs_dir}/{name}.png", full_page=True)
         logger.info(f"Screenshot taken: {name}")
         # take mobile screenshots
