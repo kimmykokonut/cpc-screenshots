@@ -134,7 +134,7 @@ def take_programs_screenshots(page, base_dated_dir, playwright, browser):
                 page,
                 youtube_iframe_selector,
                 ".html5-video-container",
-                scroll_top=False,
+                scroll_top=True,
             )
         page.wait_for_timeout(1000)
         page.screenshot(path=f"{programs_dir}/{name}.png", full_page=True)
