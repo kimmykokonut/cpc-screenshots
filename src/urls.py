@@ -16,7 +16,7 @@ about_and_info_urls = {
 programs_urls = {
     "https://www.capeperpetuacollaborative.org/programs": "programs",
     "https://www.capeperpetuacollaborative.org/tidepool-ambassador": "programs-tidepool",
-    "https://www.capeperpetuacollaborative.org/marine-reserve-ambassador": "programs-marine",
+    "https://www.capeperpetuacollaborative.org/marine-reserve-ambassador": "programs-marine-ambassador",
     "https://www.capeperpetuacollaborative.org/bioblitzes": "programs-bioblitzes",
     "https://www.capeperpetuacollaborative.org/sea-star-monitoring": "programs-seastar",
     "https://www.capeperpetuacollaborative.org/marine-debris-surveys": "programs-debris",

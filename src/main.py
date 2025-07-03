@@ -72,7 +72,7 @@ def take_home_screenshots(page, base_dated_dir, playwright, browser):
         logger.info(f"Mobile screenshot taken: {name}")
 
 
-def take_content_screenshots(page, base_dated_dir, playwright, browser):
+def take_about_screenshots(page, base_dated_dir, playwright, browser):
     content_dir = os.path.join(base_dated_dir, "content")
     os.makedirs(content_dir, exist_ok=True)
 
@@ -192,10 +192,10 @@ def main():
         context = browser.new_context()
         page = context.new_page()
 
-        # take_home_screenshots(page, base_dated_dir, p, browser)
-        take_content_screenshots(page, base_dated_dir, p, browser)
-        # take_programs_screenshots(page, base_dated_dir, p, browser)
-        # take_forms_screenshots(page, base_dated_dir, p, browser)
+        take_home_screenshots(page, base_dated_dir, p, browser)
+        take_about_screenshots(page, base_dated_dir, p, browser)
+        take_programs_screenshots(page, base_dated_dir, p, browser)
+        take_forms_screenshots(page, base_dated_dir, p, browser)
 
         browser.close()
         logger.info("------------bye!------------")
