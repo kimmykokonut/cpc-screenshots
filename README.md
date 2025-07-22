@@ -49,14 +49,9 @@ Created for a specific url, you will need to alter code depending on differing c
 
 ### Issues
 * iframe loading and navbar position when scrolling/waiting for home page load
-* pages wip
-   - /team: mobile- img blurr
-   - /learn: mobile - youtube not visible, leaving as-is
-   - /programs:
-      - debris: desktop no img
-      - tidepool: desktop missing img
-      - marine: desktop
-      - landsea: desktop- Youtube iframe.
+* pages to manual screenshot
+   - /team: mobile- img blurry regardless of scrolling.
+   - /learn: mobile - youtube iframe not visible by playwright, leaving as-is for now
 
 ## ⏫ Level Up
    [] refactor code to be more generic/multi-purpose

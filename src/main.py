@@ -26,7 +26,7 @@ def wait_for_iframe_load(page, iframe_selector, event_selector, scroll_top=False
         # Scroll to bottom to trigger events widget loading
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
     # wait for iframe to be attached
-    page.wait_for_timeout(3000)  # changed from 3k to 5 sec, 5k
+    page.wait_for_timeout(3000)
 
     try:
         iframe_element = page.wait_for_selector(
@@ -54,7 +54,7 @@ def take_home_screenshots(page, base_dated_dir, playwright, browser):
 
         # Scroll to page top before screenshot so navbar is in correct location
         page.evaluate("window.scrollTo(0, 0)")
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(3000)
 
         page.screenshot(path=f"{home_dir}/{name}.png", full_page=True)
         logger.info(f"Screenshot taken: {name}")
@@ -66,6 +66,7 @@ def take_home_screenshots(page, base_dated_dir, playwright, browser):
         mobile_page.goto(url)
         # wait for events to load
         wait_for_iframe_load(mobile_page, events_iframe_selector, ".event-single-item")
+        page.wait_for_timeout(1000)
         mobile_page.screenshot(path=f"{home_dir}/{name}-mobile.png", full_page=True)
         mobile_page.close()
         context.close()
@@ -93,6 +94,7 @@ def take_about_screenshots(page, base_dated_dir, playwright, browser):
             page.wait_for_timeout(3000)
         # scroll top
         page.evaluate("window.scrollTo(0, 0)")
+        page.wait_for_timeout(2000)
         page.screenshot(path=f"{content_dir}/{name}.png", full_page=True)
         logger.info(f"Screenshot taken: {name}")
 
@@ -101,19 +103,23 @@ def take_about_screenshots(page, base_dated_dir, playwright, browser):
         context = browser.new_context(**iphone)
         mobile_page = context.new_page()
         mobile_page.goto(url)
-        # BUG: youtube iframe container not visible in DOM, timed out in mobile emulation
-        if url == "https://www.capeperpetuacollaborative.org/learn":
-            logger.info("in mobile learn view...")
-            wait_for_iframe_load(
-                mobile_page,
-                youtube_iframe_selector,
-                ".ytmCuedOverlayHost",
-                scroll_top=True,
-            )
-        else:
-            mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            mobile_page.wait_for_timeout(5000)
 
+        # BUG: youtube iframe container not visible in DOM, timed out in mobile emulation
+        # This is from archived site. /learn not in new site
+        # if url == "https://www.capeperpetuacollaborative.org/learn":
+        #     logger.info("in mobile learn view...")
+        #     wait_for_iframe_load(
+        #         mobile_page,
+        #         youtube_iframe_selector,
+        #         ".ytmCuedOverlayHost",
+        #         scroll_top=True,
+        #     )
+        mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        mobile_page.wait_for_timeout(2000)
+        mobile_page.evaluate("window.scrollTo(0, 0)")
+        mobile_page.wait_for_timeout(2000)
+        mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        mobile_page.wait_for_timeout(3000)
         mobile_page.screenshot(path=f"{content_dir}/{name}-mobile.png", full_page=True)
         mobile_page.close()
         context.close()
@@ -128,7 +134,7 @@ def take_programs_screenshots(page, base_dated_dir, playwright, browser):
         page.set_viewport_size({"width": 1280, "height": 2000})
         page.goto(url)
         logger.info(f"At url: {url}")
-        page.wait_for_load_state("domcontentloaded")  # change 50k to 15k
+        page.wait_for_load_state("domcontentloaded")
         if url == "https://www.capeperpetuacollaborative.org/land-sea-symposium":
             wait_for_iframe_load(
                 page,
@@ -136,7 +142,7 @@ def take_programs_screenshots(page, base_dated_dir, playwright, browser):
                 ".html5-video-container",
                 scroll_top=True,
             )
-        page.wait_for_timeout(1000)
+        page.wait_for_timeout(2000)
         page.screenshot(path=f"{programs_dir}/{name}.png", full_page=True)
         logger.info(f"Screenshot taken: {name}")
         # take mobile screenshots
@@ -145,11 +151,18 @@ def take_programs_screenshots(page, base_dated_dir, playwright, browser):
         mobile_page = context.new_page()
         mobile_page.goto(url)
         mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        mobile_page.wait_for_timeout(6000)
+        mobile_page.wait_for_timeout(2000)
+        if url == "https://www.capeperpetuacollaborative.org/land-sea-symposium":
+            wait_for_iframe_load(
+                mobile_page,
+                youtube_iframe_selector,
+                ".html5-video-container",
+                scroll_top=False,
+            )
         mobile_page.evaluate("window.scrollTo(0, 0)")
-        mobile_page.wait_for_timeout(1000)
+        mobile_page.wait_for_timeout(2000)
         mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        mobile_page.wait_for_timeout(3000)
+        mobile_page.wait_for_timeout(4000)
         mobile_page.screenshot(path=f"{programs_dir}/{name}-mobile.png", full_page=True)
         mobile_page.close()
         context.close()
@@ -164,7 +177,8 @@ def take_forms_screenshots(page, base_dated_dir, playwright, browser):
         page.set_viewport_size({"width": 1280, "height": 720})
         page.goto(url)
         logger.info(f"At url: {url}")
-        page.wait_for_load_state("domcontentloaded")
+        # page.wait_for_load_state("domcontentloaded")
+        page.wait_for_timeout(2000)
         page.screenshot(path=f"{forms_dir}/{name}.png", full_page=True)
         logger.info(f"Screenshot taken: {name}")
         # take mobile screenshots
@@ -172,6 +186,7 @@ def take_forms_screenshots(page, base_dated_dir, playwright, browser):
         context = browser.new_context(**iphone)
         mobile_page = context.new_page()
         mobile_page.goto(url)
+        mobile_page.wait_for_timeout(3000)
         mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         mobile_page.wait_for_timeout(3000)
         mobile_page.screenshot(path=f"{forms_dir}/{name}-mobile.png", full_page=True)
@@ -192,10 +207,10 @@ def main():
         context = browser.new_context()
         page = context.new_page()
 
-        take_home_screenshots(page, base_dated_dir, p, browser)
-        take_about_screenshots(page, base_dated_dir, p, browser)
+        # take_home_screenshots(page, base_dated_dir, p, browser)
+        # take_about_screenshots(page, base_dated_dir, p, browser)
         take_programs_screenshots(page, base_dated_dir, p, browser)
-        take_forms_screenshots(page, base_dated_dir, p, browser)
+        # take_forms_screenshots(page, base_dated_dir, p, browser)
 
         browser.close()
         logger.info("------------bye!------------")
