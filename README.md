@@ -3,6 +3,9 @@ _by [Kim Robinson](https://kimmykokonut.github.io/)_
 
 This project uses headless Playwright in Python to take screenshots of desired urls for documenting before/after website refresh by [PDX Digital Corps](https://digitalcorpspdx.org/) for [Cape Perpetua Collaborative](https://www.capeperpetuacollaborative.org/)
 
+  <img src="./src/assets/cpc-before-after-home.png" alt="Landing page before and after" width="400">
+
+
 ### 🔧 Built With
 ![Playwright](https://img.shields.io/badge/-playwright-%232EAD33?style=for-the-badge&logo=playwright&logoColor=white)
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
@@ -45,13 +48,12 @@ $ docker run -v $(pwd)/screenshots:/screenshots -v $(pwd)/src:/src cpc-screensho
 
 ## 📝 Notes
 
-Created for a specific url, you will need to alter code depending on differing content on other urls.
+Created for a specific url, you will need to alter code depending on differing content of other websites.
 
 ### Issues
-* iframe loading and navbar position when scrolling/waiting for home page load
-* pages to manual screenshot
+* pages to manual screenshot:
    - /team: mobile- img blurry regardless of scrolling.
-   - /learn: mobile - youtube iframe not visible by playwright, leaving as-is for now
+   - /land-sea-symposium: mobile - youtube iframe not visible by playwright, leaving as-is for now. Spent a lot of troubleshooting time, not worth more.
 
 ## ⏫ Level Up
    [] refactor code to be more generic/multi-purpose
