@@ -20,7 +20,7 @@ def wait_for_iframe_load(page, iframe_selector, event_selector, scroll_top=False
         f"Waiting for iframe to load...selector={iframe_selector}, event:{event_selector}"
     )
     if scroll_top:
-        # scroll top for /learn yt iframe
+        # scroll top for /land-sea iframe loading
         page.evaluate("window.scrollTo(0,0)")
     else:
         # Scroll to bottom to trigger events widget loading
@@ -51,14 +51,11 @@ def take_home_screenshots(page, base_dated_dir, playwright, browser):
         page.goto(url)
         logger.info(f"At url: {url}")
         wait_for_iframe_load(page, events_iframe_selector, ".event-single-item")
-
         # Scroll to page top before screenshot so navbar is in correct location
         page.evaluate("window.scrollTo(0, 0)")
         page.wait_for_timeout(3000)
-
         page.screenshot(path=f"{home_dir}/{name}.png", full_page=True)
         logger.info(f"Screenshot taken: {name}")
-
         # take mobile screenshots
         iphone = playwright.devices["iPhone 12"]
         context = browser.new_context(**iphone)
@@ -81,39 +78,20 @@ def take_about_screenshots(page, base_dated_dir, playwright, browser):
         page.set_viewport_size({"width": 1280, "height": 2000})
         page.goto(url)
         logger.info(f"At url: {url}")
-        page.wait_for_load_state("domcontentloaded", timeout=15000)  # change 50k to 15k
-        if url == "https://www.capeperpetuacollaborative.org/learn":
-            wait_for_iframe_load(
-                page,
-                youtube_iframe_selector,
-                ".ytp-cued-thumbnail-overlay-image",
-                scroll_top=True,
-            )
-        else:
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            page.wait_for_timeout(3000)
-        # scroll top
-        page.evaluate("window.scrollTo(0, 0)")
+        # page.wait_for_load_state("domcontentloaded", timeout=15000)
+        # # scroll bottom page
+        # page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        # page.wait_for_timeout(3000)
+        # # scroll top
+        # page.evaluate("window.scrollTo(0, 0)")
         page.wait_for_timeout(2000)
         page.screenshot(path=f"{content_dir}/{name}.png", full_page=True)
         logger.info(f"Screenshot taken: {name}")
-
         # take mobile screenshots
         iphone = playwright.devices["iPhone 12"]
         context = browser.new_context(**iphone)
         mobile_page = context.new_page()
         mobile_page.goto(url)
-
-        # BUG: youtube iframe container not visible in DOM, timed out in mobile emulation
-        # This is from archived site. /learn not in new site
-        # if url == "https://www.capeperpetuacollaborative.org/learn":
-        #     logger.info("in mobile learn view...")
-        #     wait_for_iframe_load(
-        #         mobile_page,
-        #         youtube_iframe_selector,
-        #         ".ytmCuedOverlayHost",
-        #         scroll_top=True,
-        #     )
         mobile_page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         mobile_page.wait_for_timeout(2000)
         mobile_page.evaluate("window.scrollTo(0, 0)")
@@ -177,7 +155,6 @@ def take_forms_screenshots(page, base_dated_dir, playwright, browser):
         page.set_viewport_size({"width": 1280, "height": 720})
         page.goto(url)
         logger.info(f"At url: {url}")
-        # page.wait_for_load_state("domcontentloaded")
         page.wait_for_timeout(2000)
         page.screenshot(path=f"{forms_dir}/{name}.png", full_page=True)
         logger.info(f"Screenshot taken: {name}")
@@ -207,10 +184,10 @@ def main():
         context = browser.new_context()
         page = context.new_page()
 
-        # take_home_screenshots(page, base_dated_dir, p, browser)
-        # take_about_screenshots(page, base_dated_dir, p, browser)
+        take_home_screenshots(page, base_dated_dir, p, browser)
+        take_about_screenshots(page, base_dated_dir, p, browser)
         take_programs_screenshots(page, base_dated_dir, p, browser)
-        # take_forms_screenshots(page, base_dated_dir, p, browser)
+        take_forms_screenshots(page, base_dated_dir, p, browser)
 
         browser.close()
         logger.info("------------bye!------------")
