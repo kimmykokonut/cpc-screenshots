@@ -26,8 +26,8 @@ programs_urls = {
 forms_urls = {
     "https://www.capeperpetuacollaborative.org/volunteer": "get-involved-volunteer",
     "https://www.capeperpetuacollaborative.org/contact-us": "about-contact",
-    # 3rd party links unchanged from archived site.
-    # "https://www.discovernw.org/store_cape-perpetua-collaborative_8701-671420b.html": "donate",
     "https://www.capeperpetuacollaborative.org/donate": "get-involved-donate",
-    # "https://facebook.us18.list-manage.com/subscribe?u=c8bd8a1b0ff8af8ef5d75e878&id=24b2f4f5fd": "newsletter",
+    # 3rd party links unchanged from archived site.
+    "https://www.discovernw.org/store_cape-perpetua-collaborative_8701-671420b.html": "donate",
+    "https://facebook.us18.list-manage.com/subscribe?u=c8bd8a1b0ff8af8ef5d75e878&id=24b2f4f5fd": "newsletter",
 }

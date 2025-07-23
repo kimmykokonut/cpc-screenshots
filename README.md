@@ -5,7 +5,6 @@ This project uses headless Playwright in Python to take screenshots of desired u
 
   <img src="./src/assets/cpc-before-after-home.png" alt="Landing page before and after" width="400">
 
-
 ### 🔧 Built With
 ![Playwright](https://img.shields.io/badge/-playwright-%232EAD33?style=for-the-badge&logo=playwright&logoColor=white)
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
@@ -49,6 +48,8 @@ $ docker run -v $(pwd)/screenshots:/screenshots -v $(pwd)/src:/src cpc-screensho
 ## 📝 Notes
 
 Created for a specific url, you will need to alter code depending on differing content of other websites.
+
+The biggest challenges I faced were slower page loads due to animation and waiting for embedded iframes holding youtube videos and 3rd party widgets like EventBrite.  Having to wait for specific iframes to load, or scrolling to the bottom of the page/top of the page made this too challenging for a generic website screenshot tool.  Regardless, this can be used again for Cape Perpetua for documentation or other needs.
 
 ### Issues
 * pages to manual screenshot:
