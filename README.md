@@ -1,9 +1,18 @@
 # Automated Screenshot Script
 _by [Kim Robinson](https://kimmykokonut.github.io/)_
 
-This project uses headless Playwright in Python to take screenshots of desired urls for documenting before/after website refresh by [PDX Digital Corps](https://digitalcorpspdx.org/) for [Cape Perpetua Collaborative](https://www.capeperpetuacollaborative.org/)
+This project uses headless Playwright in Python to take screenshots of desired urls for documenting before/after website refresh by [PDX Digital Corps](https://digitalcorpspdx.org/) for [Cape Perpetua Collaborative](https://www.capeperpetuacollaborative.org/).
+See our report/slideshow [here](https://digitalcorpspdx.org/report).
 
-  <img src="./src/assets/cpc-before-after-home.png" alt="Landing page before and after" width="400">
+### Landing Page
+| Before | After |
+| --- | --- |
+| <img src="./src/assets/home-before.png" alt="Landing page before" width="300"> | <img src="./src/assets/home-after.png" alt="Landing page after" width="300">
+
+### Visit Page
+| Before | After |
+| --- | --- |
+| <img src="./src/assets/visit-before.png" alt="Visit page before" width="250"> | <img src="./src/assets/visit-after.png" alt="Visit page after" width="250"><img src="./src/assets/visit-do.png" alt="Visit to do page after" width="250"> |
 
 ### 🔧 Built With
 ![Playwright](https://img.shields.io/badge/-playwright-%232EAD33?style=for-the-badge&logo=playwright&logoColor=white)
